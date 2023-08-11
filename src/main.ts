@@ -1,5 +1,25 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
+import * as vectordb from 'vectordb';
+
+async function example () {
+    const db = await vectordb.connect('data/sample-lancedb')
+
+    const data = [
+        { id: 1, vector: [0.1, 0.2], price: 10 },
+        { id: 2, vector: [1.1, 1.2], price: 50 }
+    ]
+
+    const table = await db.createTable('vectors', data)
+    console.log(await db.tableNames())
+
+    const results = await table
+        .search([0.1, 0.3])
+        .limit(20)
+        .execute()
+    console.log(results)
+}
+
 
 function createWindow() {
   // Create the browser window.
@@ -23,7 +43,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
-
+  example().then(_ => { console.log ("All done!") })
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
